@@ -347,10 +347,8 @@
         let comments = [];
         let commentId = 4;
         
-        // Flag ofuscada (base64 multiple)
         const secretKey = 'Q1RGe0QwTV9YU1NfQ1NJUlRfMjAyNX0=';
         
-        // Simulación de datos existentes
         const existingComments = [
             {
                 id: 1,
@@ -380,15 +378,12 @@
         
         comments = [...existingComments];
         
-        // Función vulnerable de sanitización
         function sanitizeInput(input, type) {
             if (type === 'html') {
-                // Tipo "HTML" con sanitización mínima (vulnerable)
                 return input.replace(/<script>/gi, '&lt;script&gt;')
                            .replace(/<\/script>/gi, '&lt;/script&gt;');
             }
             
-            // Sanitización "básica" que se puede bypassear
             return input.replace(/<script/gi, '&lt;script')
                        .replace(/javascript:/gi, 'javascript-')
                        .replace(/on\w+=/gi, function(match) {
@@ -396,7 +391,6 @@
                        });
         }
         
-        // Manejo del formulario
         document.getElementById('comment-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -405,7 +399,6 @@
             const type = document.getElementById('comment-type').value;
             const content = document.getElementById('comment-text').value;
             
-            // "Sanitización" vulnerable
             const sanitizedContent = sanitizeInput(content, type);
             
             const newComment = {
@@ -420,16 +413,13 @@
             comments.push(newComment);
             renderComments();
             
-            // Limpiar formulario
             this.reset();
             
-            // Mostrar indicador de vulnerabilidad si hay XSS
             if (content.includes('<') || content.includes('javascript:')) {
                 showVulnIndicator();
             }
         });
         
-        // Función vulnerable para renderizar comentarios
         function renderComments(filter = 'all') {
             const commentsSection = document.getElementById('comments-section');
             let filteredComments = comments;
@@ -442,7 +432,6 @@
             
             filteredComments.forEach(comment => {
                 const cssClass = comment.type === 'admin' ? 'comment admin-comment' : 'comment';
-                // VULNERABILIDAD: Uso directo de innerHTML sin escape
                 html += `
                     <div class="${cssClass}" data-type="${comment.type}">
                         <div class="comment-meta">
@@ -455,11 +444,9 @@
                 `;
             });
             
-            // VULNERABILIDAD CRÍTICA: innerHTML sin sanitización
             commentsSection.innerHTML = html;
         }
         
-        // Función vulnerable de búsqueda
         function searchComments(query) {
             if (!query) {
                 renderComments();
@@ -476,7 +463,6 @@
             
             filteredComments.forEach(comment => {
                 const cssClass = comment.type === 'admin' ? 'comment admin-comment' : 'comment';
-                // VULNERABILIDAD: query sin escape
                 const highlightedContent = comment.content.replace(
                     new RegExp(query, 'gi'), 
                     `<mark>${query}</mark>`
@@ -497,9 +483,7 @@
             commentsSection.innerHTML = html;
         }
         
-        // Función de filtrado vulnerable
         function filterComments(type) {
-            // Actualizar botones activos
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
@@ -525,7 +509,6 @@
             }, 3000);
         }
         
-        // Función para decodificar la flag
         function decodeFlag() {
             try {
                 return atob(secretKey);
@@ -534,7 +517,6 @@
             }
         }
         
-        // Función para mostrar la flag (se activa con XSS exitoso)
         function showFlag() {
             const decodedFlag = decodeFlag();
             document.getElementById('flag-display').innerHTML = `🏁 ${decodedFlag}`;
@@ -543,13 +525,10 @@
             document.querySelector('.vulnerability-indicator').textContent = '🏁 XSS Success!';
         }
         
-        // Simulación de función del admin (objetivo del XSS)
         function adminFunction() {
-            // Esta función simula acceso de administrador
             const secretData = decodeFlag();
             showFlag();
             
-            // Mostrar datos "secretos" del admin
             document.getElementById('admin-secret').innerHTML = `
                 <div style="color: #dc3545; font-weight: bold;">
                     🔐 Datos confidenciales del admin:<br>
@@ -563,10 +542,8 @@
             console.log('🏁 FLAG:', secretData);
         }
         
-        // Inicializar la aplicación
         renderComments();
         
-        // Easter eggs para debuggers
         console.log('🕵️ XSS CTF Challenge');
         console.log('💡 Try different XSS vectors in comments');
         console.log('🎯 Goal: Execute adminFunction()');
